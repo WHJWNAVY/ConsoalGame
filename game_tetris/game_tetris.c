@@ -15,7 +15,7 @@
 #define GAME_SCREEN_L         (SCREEN_Y)//屏幕长度
 #define GAME_SCREEN_H         (SCREEN_X)//屏幕宽度
 #else
-#define GAME_SCREEN_L         (SCREEN_X-20)//屏幕长度
+#define GAME_SCREEN_L         (SCREEN_X)//屏幕长度
 #define GAME_SCREEN_H         (SCREEN_Y)//屏幕宽度
 #endif
 #define GAME_POINT_SIZE       1//点大小，单位:像素，点为正方形
@@ -621,10 +621,13 @@ int32 tetris_game_run(void)
     {//不可下落的情况下,计算分数,并产生一个新的shape,重新开始
         max_stackh = game_get_maxh_stack();
         DEBUG_LOG("max_stackh=%d\n", max_stackh);
-        if(max_stackh >= GAME_MAX_Y)
+        if(max_stackh >= (GAME_MAX_Y - 1))
         {
             game_clear_screen(FALSE);
-            tetris_game_init();//屏幕满,游戏结束
+            //tetris_game_init();//屏幕满,游戏结束
+            game_shape_init();
+            glGameSCore = 0;
+            glGameSpeed = GAME_MIN_SPEED;
             glGameLife = FALSE;
             return RTN_OK;
         }
@@ -679,6 +682,11 @@ int32 tetris_game_run(void)
             (GAME_MAX_X - 1 - max_stackh))//已经没有空间了
         {
             game_clear_screen(FALSE);
+            //tetris_game_init();//屏幕满,游戏结束
+            glGameSCore = 0;
+            glGameSpeed = GAME_MIN_SPEED;
+            glGameLife = FALSE;
+            return RTN_OK;
         }
     }
 
