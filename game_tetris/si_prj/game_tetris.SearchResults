@@ -1,0 +1,9 @@
+---- TE_SHAPE_BOX Matches (8 in 1 files) ----
+Game_tetris.c:game_point_t TE_SHAPE_BOX[MAX_SHAPE_CNT][SHAPE_PNT_CNT] =
+Game_tetris.c:        shape_pnt.x = (TE_SHAPE_BOX[_shape->index][i]).x + (_shape->point).x;
+Game_tetris.c:        shape_pnt.y = (TE_SHAPE_BOX[_shape->index][i]).y + (_shape->point).y;
+Game_tetris.c:        pnt_t.x = (shape->point).x + (TE_SHAPE_BOX[shape->index][i]).x;
+Game_tetris.c:        pnt_t.y = (shape->point).y + (TE_SHAPE_BOX[shape->index][i]).y;
+Game_tetris.c:        pnt_t.col = (TE_SHAPE_BOX[shape->index][i]).col;
+Game_tetris.c:        pnt_t.x = (shape->point).x + (TE_SHAPE_BOX[shape->index][i]).x;
+Game_tetris.c:        pnt_t.y = (shape->point).y + (TE_SHAPE_BOX[shape->index][i]).y + 1;

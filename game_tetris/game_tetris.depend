@@ -1,0 +1,74 @@
+# depslib dependency file v1.0
+1517990334 source:e:\my_program\c_program\game_tetris\game_tetris.c
+	<windows.h>
+	<conio.h>
+	<string.h>
+	<stdio.h>
+	"game_tetris.h"
+
+1517979287 e:\my_program\c_program\game_tetris\game_tetris.h
+	"lcd_gdi.h"
+
+1517989654 e:\my_program\c_program\game_tetris\type.h
+
+1517993431 e:\my_program\c_program\game_tetris\lcd_gdi.h
+	"type.h"
+
+1517910879 source:e:\my_program\c_program\game_tetris\lcd_gdi.c
+	<windows.h>
+	<math.h>
+	<conio.h>
+	"font.h"
+	"lcd_gdi.h"
+
+1517898085 e:\my_program\c_program\game_tetris\font.h
+
+1517989189 source:e:\my_program\c_program\game_tetris\tetris.c
+	<windows.h>
+	<time.h>
+	<stdlib.h>
+
+1517982281 source:e:\my_program\c_program\game_tetris\main.c
+	<windows.h>
+	<conio.h>
+	"type.h"
+	"lcd_gdi.h"
+	"game_tetris.h"
+
+1517998203 source:e:\my_program\c_program\consoal_game\game_tetris\game_tetris.c
+	<windows.h>
+	<conio.h>
+	<string.h>
+	<stdio.h>
+	"game_tetris.h"
+
+1517997396 e:\my_program\c_program\consoal_game\game_tetris\game_tetris.h
+	"lcd_gdi.h"
+
+1517998762 e:\my_program\c_program\consoal_game\game_tetris\lcd_gdi.h
+	"type.h"
+
+1517989654 e:\my_program\c_program\consoal_game\game_tetris\type.h
+
+1517910879 source:e:\my_program\c_program\consoal_game\game_tetris\lcd_gdi.c
+	<windows.h>
+	<math.h>
+	<conio.h>
+	"font.h"
+	"lcd_gdi.h"
+
+1517898085 e:\my_program\c_program\consoal_game\game_tetris\font.h
+
+1517997745 source:e:\my_program\c_program\consoal_game\game_tetris\main.c
+	<windows.h>
+	<conio.h>
+	<stdio.h>
+	"type.h"
+	"lcd_gdi.h"
+	"game_tetris.h"
+
+1517989189 source:e:\my_program\c_program\consoal_game\game_tetris\tetris.c
+	<windows.h>
+	<time.h>
+	<stdlib.h>
+
