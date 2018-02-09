@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1518085908 source:e:\my_program\c_program\consoal_game\graphic\lcd_gdi.c
+	<windows.h>
+	<math.h>
+	<conio.h>
+	"font8x8.h"
+	"font5x7.h"
+	"lcd_gdi.h"
+	"stdio.h"
+
+1517898164 e:\my_program\c_program\consoal_game\graphic\font.h
+
+1518085172 e:\my_program\c_program\consoal_game\graphic\lcd_gdi.h
+	"type.h"
+
+1517898100 e:\my_program\c_program\consoal_game\graphic\type.h
+
+1518086200 source:e:\my_program\c_program\consoal_game\graphic\main.c
+	<stdio.h>
+	<stdlib.h>
+	"lcd_gdi.h"
+
+1518085039 e:\my_program\c_program\consoal_game\graphic\font8x8.h
+
+1518086310 e:\my_program\c_program\consoal_game\graphic\font5x7.h
+
