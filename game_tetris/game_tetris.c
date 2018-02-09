@@ -10,7 +10,7 @@
 /*----------------------------------------------*
 * 宏定义                                       *
 *----------------------------------------------*/
-//#define GAME_MIRROR_XY        1//交换xy坐标
+#define GAME_MIRROR_XY        1//交换xy坐标
 #ifdef GAME_MIRROR_XY
 #define GAME_SCREEN_L         (SCREEN_Y)//屏幕长度
 #define GAME_SCREEN_H         (SCREEN_X)//屏幕宽度
@@ -34,10 +34,23 @@
 #define GAME_MIN_SPEED        1 //最小游戏速度
 #define GAME_SPEED_STEP       10//每得10分游戏速度+1
 
-game_shape_t glGameShape;
-int32        glGameSCore;
-int32        glGameSpeed;
-int32        glGameLife;
+typedef struct game_point_s
+{
+    int32       x;
+    int32       y;
+    int32       col;
+} game_point_t;
+
+typedef struct game_shape_s
+{
+    int32           index;
+    game_point_t    point;
+} game_shape_t;
+
+game_shape_t        glGameShape;
+int32               glGameSCore;
+int32               glGameSpeed;
+tetris_game_life_t  glGameLife;
 
 /*俄罗斯方块共有7种基本形状，每种基本形状可旋转4次，每种形状
 由4个小方块组成。这里假设把每种基本形状放在一个4x4的矩阵里，
@@ -104,9 +117,9 @@ int32 GAME_SHAPE_SIZE[MAX_SHAPE_CNT][2] =
 int32 game_draw_point(const game_point_t* const s_point)
 {
     int32 x = 0, y = 0, col = 0;
-    #ifdef GAME_MIRROR_XY
+#ifdef GAME_MIRROR_XY
     int32 yt = 0;
-    #endif
+#endif
 
     if(s_point == RTN_NULL)
         return RTN_ERR;
@@ -118,19 +131,22 @@ int32 game_draw_point(const game_point_t* const s_point)
     //x = ((x < 0) ? 0 : ((x >= GAME_MAX_X) ? (GAME_MAX_X - 1) : x));
     //y = ((y < 0) ? 0 : ((y >= GAME_MAX_Y) ? (GAME_MAX_Y - 1) : y));
     if((x < 0) || (x >= GAME_MAX_X) ||
-       (y < 0) || (y >= GAME_MAX_Y))
+            (y < 0) || (y >= GAME_MAX_Y))
     {
         return RTN_ERR;
     }
 
-    #ifdef GAME_MIRROR_XY
+#ifdef GAME_MIRROR_XY
     yt = y;
     y = x * GAME_POINT_L;
     x = yt * GAME_POINT_H;
-    #else
+
+    x = ((GAME_MAX_Y - 1) - x);
+    //y = ((GAME_MAX_X - 1) - y);
+#else
     x = x * GAME_POINT_L;
     y = y * GAME_POINT_H;
-    #endif
+#endif
 
     if(GAME_POINT_SIZE != 1) //画一个矩形代表缩放过后的点
         gdi_rectangle(x, y, x + GAME_POINT_L - 1, y + GAME_POINT_H - 1, col, 1);
@@ -151,9 +167,9 @@ int32 game_draw_point(const game_point_t* const s_point)
 int32 game_get_point(const game_point_t* const s_point)
 {
     int32 x = 0, y = 0;
-    #ifdef GAME_MIRROR_XY
+#ifdef GAME_MIRROR_XY
     int32 yt = 0;
-    #endif
+#endif
 
     if(s_point == RTN_NULL)
         return RTN_ERR;
@@ -164,19 +180,22 @@ int32 game_get_point(const game_point_t* const s_point)
     //x = ((x < 0) ? 0 : ((x >= GAME_MAX_X) ? (GAME_MAX_X - 1) : x));
     //y = ((y < 0) ? 0 : ((y >= GAME_MAX_Y) ? (GAME_MAX_Y - 1) : y));
     if((x < 0) || (x >= GAME_MAX_X) ||
-       (y < 0) || (y >= GAME_MAX_Y))
+            (y < 0) || (y >= GAME_MAX_Y))
     {
         return FALSE;
     }
 
-    #ifdef GAME_MIRROR_XY
+#ifdef GAME_MIRROR_XY
     yt = y;
     y = x * GAME_POINT_L;
     x = yt * GAME_POINT_H;
-    #else
+
+    x = ((GAME_MAX_Y - 1) - x);
+    //y = ((GAME_MAX_X - 1) - y);
+#else
     x = x * GAME_POINT_L;
     y = y * GAME_POINT_H;
-    #endif
+#endif
 
     return((gdi_get_point(x, y)) ? TRUE : FALSE);
 }
@@ -221,7 +240,7 @@ int32 game_point_cmp(game_point_t* s1, game_point_t* s2)
 /*****************************************************************************
  函 数 名  : game_show_shpe
  功能描述  : 显示一个shape
- 输入参数  : game_shape_t* _shape  
+ 输入参数  : game_shape_t* _shape
  输出参数  : 无
  返 回 值  : RTN_OK:成功, RTN_ERR:失败
 *****************************************************************************/
@@ -237,7 +256,7 @@ int32 game_show_shpe(game_shape_t* _shape)
         shape_pnt.col = /*(_shape->point).col*/TRUE;
 
         if((shape_pnt.x < 0) || (shape_pnt.x >= GAME_MAX_X) ||
-           (shape_pnt.y < 0) || (shape_pnt.y >= GAME_MAX_Y))
+                (shape_pnt.y < 0) || (shape_pnt.y >= GAME_MAX_Y))
         {
             //return RTN_ERR;
             continue;
@@ -272,7 +291,7 @@ int32 game_clear_shpe(game_shape_t* _shape)
         shape_pnt.col = FALSE;
 
         if((shape_pnt.x < 0) || (shape_pnt.x >= GAME_MAX_X) ||
-           (shape_pnt.y < 0) || (shape_pnt.y >= GAME_MAX_Y))
+                (shape_pnt.y < 0) || (shape_pnt.y >= GAME_MAX_Y))
         {
             //return RTN_ERR;
             continue;
@@ -299,6 +318,7 @@ int32 game_clear_line(int32 row)
 {
     int32 x = 0;
     game_point_t pnt;
+
     //row = ((row < 0) ? 0 : ((row >= GAME_MAX_Y) ? (GAME_MAX_Y - 1) : row));
     if((row < 0) || (row >= GAME_MAX_Y))
     {
@@ -325,7 +345,7 @@ int32 game_clear_line(int32 row)
 /*****************************************************************************
  函 数 名  : game_get_rshape_idx
  功能描述  : 获得一个随机的基本形状(在shape box中的索引)
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : index:获取到的shape在shapebox中的索引
 *****************************************************************************/
@@ -334,7 +354,7 @@ int32 game_get_rshape_idx(void)
     static uint32 sseed = 0;
     int32 index = 0;
     srand(sseed);
-    index = rand() % (MAX_SHAPE_CNT-1);//0-27
+    index = rand() % (MAX_SHAPE_CNT - 1); //0-27
     sseed = index;
     return index;
 }
@@ -350,11 +370,13 @@ int32 game_line_isfull(int32 row)
 {
     int32 x = 0, row_cnt = 0;
     game_point_t pnt;
+
     //row = ((row < 0) ? 0 : ((row >= GAME_MAX_Y) ? (GAME_MAX_Y - 1) : row));
     if((row < 0) || (row >= GAME_MAX_Y))
     {
         return FALSE;
     }
+
     pnt.y = row;
     pnt.col = TRUE;
 
@@ -367,6 +389,7 @@ int32 game_line_isfull(int32 row)
         else
             break;
     }
+
     DEBUG_LOG();
     return ((row_cnt == GAME_MAX_X) ? TRUE : FALSE);
 }
@@ -374,8 +397,8 @@ int32 game_line_isfull(int32 row)
 /*****************************************************************************
  函 数 名  : game_pnt_is_shape
  功能描述  : 判断一个点是否在shape上
- 输入参数  : game_point_t* pnt    
-             game_shape_t* shape  
+ 输入参数  : game_point_t* pnt
+             game_shape_t* shape
  输出参数  : 无
  返 回 值  : TRUE:在, FALSE:不在
 *****************************************************************************/
@@ -402,7 +425,7 @@ int32 game_pnt_is_shape(game_point_t* pnt, game_shape_t* shape)
 /*****************************************************************************
  函 数 名  : game_get_maxh_stack
  功能描述  : 获得当前最大堆叠高度
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : 获得当前最大堆叠高度,如果失败,则返回RTN_ERR
 *****************************************************************************/
@@ -410,10 +433,12 @@ int32 game_get_maxh_stack(void)
 {
     game_point_t pnt;
     pnt.col = TRUE;
-    for(pnt.y=0; pnt.y<GAME_MAX_Y; pnt.y++)
+
+    for(pnt.y = 0; pnt.y < GAME_MAX_Y; pnt.y++)
     {
-        for(pnt.x=0; pnt.x<GAME_MAX_X; pnt.x++)
-        {//倒序遍历,如果最高的那个点不为空,则这个点就是当前最大高度
+        for(pnt.x = 0; pnt.x < GAME_MAX_X; pnt.x++)
+        {
+            //倒序遍历,如果最高的那个点不为空,则这个点就是当前最大高度
             if(game_get_point(&pnt) == TRUE)
             {
                 return (GAME_MAX_Y - 1 - pnt.y);
@@ -428,13 +453,14 @@ int32 game_get_maxh_stack(void)
  函 数 名  : game_get_shape_size
  功能描述  : 获取shape的大小
  输入参数  : game_shape_t* shape  待获取大小的shape
-             int32 flag          flag=0->获取x,flag=1->获取y 
+             int32 flag          flag=0->获取x,flag=1->获取y
  输出参数  : 无
  返 回 值  : shape的大小
 *****************************************************************************/
 int32 game_get_shape_size(game_shape_t* shape, int32 flag)
 {
     int32 idx = ((flag == 0) ? 0 : 1);
+
     if((shape == NULL) || (shape->index >= MAX_SHAPE_CNT))
     {
         return RTN_ERR;
@@ -454,9 +480,10 @@ int32 game_get_shape_size(game_shape_t* shape, int32 flag)
 int32 game_point_can_down(game_point_t* pnt)
 {
     game_point_t pnt_t;
+
     if((pnt == NULL) ||
-       (pnt->x < 0) || (pnt->x >= (GAME_MAX_X - 1)) ||
-       (pnt->y < 0) || (pnt->y >= (GAME_MAX_Y - 1)))
+            (pnt->x < 0) || (pnt->x >= (GAME_MAX_X - 1)) ||
+            (pnt->y < 0) || (pnt->y >= (GAME_MAX_Y - 1)))
     {
         return RTN_ERR;
     }
@@ -472,11 +499,11 @@ int32 game_point_can_down(game_point_t* pnt)
  函 数 名  : game_shape_can_move
  功能描述  : 判断指定的shape是否能够往左,往右,往下移动
  输入参数  : game_shape_t* shape  待判断的shape
-             game_dir_t dir       shape移动的方向
+             tetris_game_dir_t dir       shape移动的方向
  输出参数  : 无
  返 回 值  : TRUE:可以移动, FALSE:不可以移动
 *****************************************************************************/
-int32 game_shape_can_move(game_shape_t* shape, game_dir_t dir)
+int32 game_shape_can_move(game_shape_t* shape, tetris_game_dir_t dir)
 {
     int32 i = 0, dx = 0, dy = 0;
     game_point_t pnt_t = {0};
@@ -485,31 +512,35 @@ int32 game_shape_can_move(game_shape_t* shape, game_dir_t dir)
 
     switch(dir)
     {
-        case DR_DOWN:
-            dx = 0;
-            dy = 1;
-            break;
-        case DR_LEFT:
-            dx = -1;
-            dy = 0;
-            break;
-        case DR_RIGHT:
-            dx = 1;
-            dy = 0;
-            break;
-        default:
-            return FALSE;
+    case DR_DOWN:
+        dx = 0;
+        dy = 1;
+        break;
+
+    case DR_LEFT:
+        dx = -1;
+        dy = 0;
+        break;
+
+    case DR_RIGHT:
+        dx = 1;
+        dy = 0;
+        break;
+
+    default:
+        return FALSE;
     }
 
     for(i = 0; i < SHAPE_PNT_CNT; i++)
-    {//遍历shape中的四个点
+    {
+        //遍历shape中的四个点
         //shape的下一个点
         pnt_t.x = (shape->point).x + (GAME_SHAPE_BOX[shape->index][i]).x + dx;
         pnt_t.y = (shape->point).y + (GAME_SHAPE_BOX[shape->index][i]).y + dy;
         pnt_t.col = (shape->point).col;
 
         if((pnt_t.x < 0) || (pnt_t.x >= GAME_MAX_X) ||
-           (pnt_t.y < 0) || (pnt_t.y >= GAME_MAX_Y))
+                (pnt_t.y < 0) || (pnt_t.y >= GAME_MAX_Y))
         {
             return FALSE;
         }
@@ -517,14 +548,14 @@ int32 game_shape_can_move(game_shape_t* shape, game_dir_t dir)
         //如果shape的某个点的下一个点不是空的,并且这个点没在shape中,
         //则表明已经没有下落的空间,否则可以下落
         if((game_get_point(&pnt_t) != FALSE) &&
-            (game_pnt_is_shape(&pnt_t, shape) != TRUE))
+                (game_pnt_is_shape(&pnt_t, shape) != TRUE))
         {
-            DEBUG_LOG("pnt_t,i=%d, x=%d,y=%d,col=%d\n",i, pnt_t.x, pnt_t.y, pnt_t.col);
+            DEBUG_LOG("pnt_t,i=%d, x=%d,y=%d,col=%d\n", i, pnt_t.x, pnt_t.y, pnt_t.col);
             return FALSE;
         }
     }
 
-      DEBUG_LOG();
+    DEBUG_LOG();
 
     return TRUE;
 }
@@ -532,7 +563,7 @@ int32 game_shape_can_move(game_shape_t* shape, game_dir_t dir)
 /*****************************************************************************
  函 数 名  : game_shape_down
  功能描述  : 判断全局shape是否能够继续下移,如果不能直接显示,如果能则继续下移
- 输入参数  : game_shape_t* _shape  
+ 输入参数  : game_shape_t* _shape
  输出参数  : 无
  返 回 值  : RTN_OK:成功, RTN_ERR:失败
 *****************************************************************************/
@@ -544,26 +575,28 @@ int32 game_shape_down(game_shape_t* _shape)
     }
 
     DEBUG_LOG("idx=%d,x=%d,y=%d,col=%d\n",
-        _shape->index, _shape->point.x,
-        _shape->point.y, _shape->point.col);
+              _shape->index, _shape->point.x,
+              _shape->point.y, _shape->point.col);
 
     if(game_shape_can_move(_shape, DR_DOWN) != TRUE)
-    {//已经没有下落空间,直接显示
+    {
+        //已经没有下落空间,直接显示
         DEBUG_LOG("game_shape_down FALSE\n");
 
         game_show_shpe(_shape);//显示
         return RTN_ERR;
     }
     else
-    {//仍有下落空间,更新坐标后显示
+    {
+        //仍有下落空间,更新坐标后显示
         game_clear_shpe(_shape);
         _shape->point.y += 1;//坐标下移
         game_show_shpe(_shape);
     }
 
     DEBUG_LOG("idx=%d,x=%d,y=%d,col=%d\n",
-        _shape->index, _shape->point.x,
-        _shape->point.y, _shape->point.col);
+              _shape->index, _shape->point.x,
+              _shape->point.y, _shape->point.col);
 
     return RTN_OK;
 }
@@ -571,13 +604,13 @@ int32 game_shape_down(game_shape_t* _shape)
 /*****************************************************************************
  函 数 名  : game_shape_init
  功能描述  : 重新生成一个全局shape
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : RTN_OK:成功
 *****************************************************************************/
 int32 game_shape_init(void)
 {
-    glGameShape.point.x = ((GAME_MAX_X-1)/2);
+    glGameShape.point.x = ((GAME_MAX_X - 1) / 2);
     glGameShape.point.y = 0;
     glGameShape.point.col = TRUE;
     glGameShape.index = game_get_rshape_idx();
@@ -587,7 +620,7 @@ int32 game_shape_init(void)
 /*****************************************************************************
  函 数 名  : tetris_game_init
  功能描述  : 游戏初始化
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : RTN_OK:成功
 *****************************************************************************/
@@ -596,9 +629,9 @@ int32 tetris_game_init(void)
     game_clear_screen(FALSE);
     glGameSCore = 0;
     glGameSpeed = GAME_MIN_SPEED;
-    glGameLife = TRUE;
+    glGameLife = LF_WIN;
     game_shape_init();
-    game_draw_point(&(glGameShape.point));
+    game_show_shpe(&glGameShape);
     return RTN_OK;
 }
 
@@ -606,39 +639,46 @@ int32 tetris_game_init(void)
 /*****************************************************************************
  函 数 名  : tetris_game_run
  功能描述  : 游戏开始运行,并处理满行,消行,分数
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : RTN_OK:成功
 *****************************************************************************/
 int32 tetris_game_run(void)
-{//shape一直下降,直到无法下降为止
-    int32 x=0, y=0, y1=0;
+{
+    //shape一直下降,直到无法下降为止
+    int32 x = 0, y = 0, y1 = 0;
     int32 max_stackh = 0;
     int32 max_y = 0;
     game_point_t pnt;
 
     if(game_shape_down(&glGameShape) != RTN_OK)
-    {//不可下落的情况下,计算分数,并产生一个新的shape,重新开始
+    {
+        //不可下落的情况下,计算分数,并产生一个新的shape,重新开始
         max_stackh = game_get_maxh_stack();
         DEBUG_LOG("max_stackh=%d\n", max_stackh);
+
         if(max_stackh >= (GAME_MAX_Y - 1))
         {
-            game_clear_screen(FALSE);
+            //game_clear_screen(FALSE);
             //tetris_game_init();//屏幕满,游戏结束
-            game_shape_init();
-            glGameSCore = 0;
-            glGameSpeed = GAME_MIN_SPEED;
-            glGameLife = FALSE;
-            return RTN_OK;
+            //game_shape_init();
+            //glGameSCore = 0;
+            //glGameSpeed = GAME_MIN_SPEED;
+            glGameLife = LF_DIE;
+            return glGameLife;
         }
 
         max_y = (GAME_MAX_Y - 1) - max_stackh;
-        for(y=(GAME_MAX_Y-1); y>=max_y; y--)
-        {//寻找是否有满行
+
+        for(y = (GAME_MAX_Y - 1); y >= max_y; y--)
+        {
+            //寻找是否有满行
             if(game_line_isfull(y) == TRUE)
-            {//如果当前行是满行,则分数加,消除当前行,所有行下移
+            {
+                //如果当前行是满行,则分数加,消除当前行,所有行下移
                 DEBUG_LOG("line %d isfull\n", y);
                 glGameSCore++;
+
                 if((glGameSCore % GAME_SPEED_STEP) == 0)
                 {
                     if(glGameSpeed < GAME_MAX_SPEED)
@@ -650,13 +690,14 @@ int32 tetris_game_run(void)
                 //如果当前行不是第一行,则上层所有点下移
                 if(y > 0)
                 {
-                    for(y1=y-1; y1>=max_y; y1--)
+                    for(y1 = y - 1; y1 >= max_y; y1--)
                     {
-                        for(x=0; x<GAME_MAX_X; x++)
+                        for(x = 0; x < GAME_MAX_X; x++)
                         {
                             //把当前坐标点的值搬移到下一个点
                             pnt.x = x;
                             pnt.y = y1;
+
                             if(game_get_point(&pnt) == TRUE)
                             {
                                 //清除当前坐标点
@@ -678,29 +719,30 @@ int32 tetris_game_run(void)
 
 
         game_shape_init();//重新产生一个shape
+
         if((game_get_shape_size(&glGameShape, 1) - 1) >
-            (GAME_MAX_X - 1 - max_stackh))//已经没有空间了
+                (GAME_MAX_Y - 1 - max_stackh))//已经没有空间了
         {
-            game_clear_screen(FALSE);
+            //game_clear_screen(FALSE);
             //tetris_game_init();//屏幕满,游戏结束
-            glGameSCore = 0;
-            glGameSpeed = GAME_MIN_SPEED;
-            glGameLife = FALSE;
-            return RTN_OK;
+            //glGameSCore = 0;
+            //glGameSpeed = GAME_MIN_SPEED;
+            glGameLife = LF_DIE;
+            return glGameLife;
         }
     }
 
     DEBUG_LOG("glGameShape,idx=%d,x=%d,y=%d,col=%d\n\n",
-        glGameShape.index, glGameShape.point.x,
-        glGameShape.point.y, glGameShape.point.col);
+              glGameShape.index, glGameShape.point.x,
+              glGameShape.point.y, glGameShape.point.col);
 
-    return RTN_OK;
+    return glGameLife;
 }
 
 /*****************************************************************************
  函 数 名  : tetris_shape_deform
  功能描述  : 全局shape变形
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : RTN_OK:成功
 *****************************************************************************/
@@ -717,7 +759,8 @@ int32 tetris_shape_deform(void)
     }
 
     game_clear_shpe(&glGameShape);
-    if((glGameShape.index % 4) <  (MAX_EXT_SHAPE_CNT - 1))
+
+    if((glGameShape.index % 4) < (MAX_EXT_SHAPE_CNT - 1))
     {
         glGameShape.index += 1;
     }
@@ -725,6 +768,7 @@ int32 tetris_shape_deform(void)
     {
         glGameShape.index = ((int32)(glGameShape.index / 4) * 4);
     }
+
     game_show_shpe(&glGameShape);
     return RTN_OK;
 }
@@ -732,11 +776,11 @@ int32 tetris_shape_deform(void)
 /*****************************************************************************
  函 数 名  : tetris_shape_move
  功能描述  : 使全局shape按指定方向移动
- 输入参数  : game_dir_t dir  全局shape移动的方向
+ 输入参数  : tetris_game_dir_t dir  全局shape移动的方向
  输出参数  : 无
  返 回 值  : RTN_OK:成功
 *****************************************************************************/
-int32 tetris_shape_move(game_dir_t dir)
+int32 tetris_shape_move(tetris_game_dir_t dir)
 {
     if(game_shape_can_move(&glGameShape, dir) != TRUE)
     {
@@ -745,26 +789,31 @@ int32 tetris_shape_move(game_dir_t dir)
 
     switch(dir)
     {
-        case DR_DOWN:
+    case DR_DOWN:
+        game_clear_shpe(&glGameShape);
+        glGameShape.point.y += 1;
+        break;
+
+    case DR_LEFT:
+        if(glGameShape.point.x > 0)
+        {
             game_clear_shpe(&glGameShape);
-            glGameShape.point.y += 1;
-            break;
-        case DR_LEFT:
-            if(glGameShape.point.x > 0)
-            {
-                game_clear_shpe(&glGameShape);
-                glGameShape.point.x -= 1;
-            }
-            break;
-        case DR_RIGHT:
-            if(glGameShape.point.x < (GAME_MAX_X - 1))
-            {
-                game_clear_shpe(&glGameShape);
-                glGameShape.point.x += 1;
-            }
-            break;
-        default:
-            break;
+            glGameShape.point.x -= 1;
+        }
+
+        break;
+
+    case DR_RIGHT:
+        if(glGameShape.point.x < (GAME_MAX_X - 1))
+        {
+            game_clear_shpe(&glGameShape);
+            glGameShape.point.x += 1;
+        }
+
+        break;
+
+    default:
+        break;
     }
 
     game_show_shpe(&glGameShape);
@@ -774,7 +823,7 @@ int32 tetris_shape_move(game_dir_t dir)
 /*****************************************************************************
  函 数 名  : tetris_get_life
  功能描述  : 获取游戏生命值
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : 游戏生命值
 *****************************************************************************/
@@ -786,7 +835,7 @@ int32 tetris_get_life(void)
 /*****************************************************************************
  函 数 名  : tetris_get_score
  功能描述  : 获得游戏得分
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : 游戏得分
 *****************************************************************************/
@@ -798,7 +847,7 @@ int32 tetris_get_score(void)
 /*****************************************************************************
  函 数 名  : tetris_get_speed
  功能描述  : 获得游戏速度
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : 游戏速度
 *****************************************************************************/
@@ -810,7 +859,7 @@ int32 tetris_get_speed(void)
 /*****************************************************************************
  函 数 名  : tetris_add_speed
  功能描述  : 游戏速度加快
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : 游戏速度
 *****************************************************************************/
@@ -825,7 +874,7 @@ int32 tetris_add_speed(void)
 /*****************************************************************************
  函 数 名  : tetris_sub_speed
  功能描述  : 游戏速度减慢
- 输入参数  : void  
+ 输入参数  : void
  输出参数  : 无
  返 回 值  : 游戏速度
 *****************************************************************************/

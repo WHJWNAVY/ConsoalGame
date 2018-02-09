@@ -35,14 +35,14 @@
 	"lcd_gdi.h"
 	"game_tetris.h"
 
-1518002298 source:e:\my_program\c_program\consoal_game\game_tetris\game_tetris.c
+1518144205 source:e:\my_program\c_program\consoal_game\game_tetris\game_tetris.c
 	<windows.h>
 	<conio.h>
 	<string.h>
 	<stdio.h>
 	"game_tetris.h"
 
-1517997396 e:\my_program\c_program\consoal_game\game_tetris\game_tetris.h
+1518144177 e:\my_program\c_program\consoal_game\game_tetris\game_tetris.h
 	"lcd_gdi.h"
 
 1518001808 e:\my_program\c_program\consoal_game\game_tetris\lcd_gdi.h
@@ -59,7 +59,7 @@
 
 1517898085 e:\my_program\c_program\consoal_game\game_tetris\font.h
 
-1517997745 source:e:\my_program\c_program\consoal_game\game_tetris\main.c
+1518144330 source:e:\my_program\c_program\consoal_game\game_tetris\main.c
 	<windows.h>
 	<conio.h>
 	<stdio.h>
